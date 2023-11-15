@@ -1,54 +1,47 @@
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 
-void delay_timer0(){
-    TCNT1 = 3036;
-
-    TCCR1A = 0x00;
-    TCCR1B = 0x04;
-
-    while((TIFR1 & 0x01)==0);
-    TCCR1A = 0x00;
-    TCCR1B = 0x00;
-
-    TIFR1 = 0x01;
-
-}
+#define BLINK_DELAY_MS 100
 
 int main(void){
     DDRB = 0xFF;
-    // while(1){
-    //     PORTB|=(1<<5);
-    //     // _delay_ms(16.384);
-    //     delay_timer0();
+    TCNT1 = 3036; //for 1000ms using 256 prescalar
+    TCCR1A = 0x00;
+    TCCR1B = 0x04;// 256 pre scalar
+    TIMSK1 = 1 << TOIE1; 
+    // TIFR1  = 1<<TOV1;
 
-    //     PORTB &= ~(1<<5);
-    //     // _delay_ms(16.384);
-    //     delay_timer0();
-    // }
+    sei();
 
     while(1){
     //led5-> led4 -> led 3 -> led 2 ->led 3 -> led 4 -> led 5...
-    for (int i=5;i>=0;i--){ 
+    for (int i=3;i>0;i--){ 
         PORTB = PORTB | (1<<i); /* set i th pin high to turn led on */
-        PORTB ^=(1<<5);
-        delay_timer0();
+        _delay_ms(BLINK_DELAY_MS);
         PORTB = PORTB &~(1<<i); /* set i th pin low to turn led off */
-        PORTB ^=(1<<5);
-        delay_timer0();
-        // _delay_ms(BLINK_DELAY_MS);
+        // delay_timer0();
+        _delay_ms(BLINK_DELAY_MS);
+    }
+    
+    for (int i=2;i<5;i++){
+        PORTB = PORTB | (1<<i); /* set i th pin high to turn led on */
+        // delay_timer0();
+        _delay_ms(BLINK_DELAY_MS);
+        PORTB = PORTB &~(1<<i); /* set i th pin low to turn led off */
+        // delay_timer0();
+        _delay_ms(BLINK_DELAY_MS);
+
     }
 
-    for (int i=1;i<5;i++){
-        PORTB = PORTB | (1<<i); /* set i th pin high to turn led on */
-        PORTB ^=(1<<5);
-        delay_timer0();
-        // _delay_ms(BLINK_DELAY_MS);
-        PORTB = PORTB &~(1<<i); /* set i th pin low to turn led off */
-        PORTB ^=(1<<5);
-        delay_timer0();
-        // _delay_ms(BLINK_DELAY_MS);
-    }
 }
+
+}
+
+ISR(TIMER1_OVF_vect){
+    PORTB ^=(1<<5);
+    TCNT1 = 3036;
+    TCCR1A = 0x00;
+    TCCR1B = 0x04;// 256 pre scalar
 
 }
