@@ -28,7 +28,8 @@ int main(void){
 
 ISR(TIMER0_OVF_vect){
     counter50++;
-    if(counter50 >=25){
+    //2ms *25 = 50ms
+    if(counter50 ==25){
         PORTB ^= (1<<5);
         counter50 = 0;
     }
@@ -37,7 +38,8 @@ ISR(TIMER0_OVF_vect){
 
 ISR(TIMER1_OVF_vect){
     counter500++;
-    if(counter500 >=5){
+    //100ms *25 = 500ms
+    if(counter500 ==5){
         PORTB ^= (1<<4);
         counter500 = 0;
     }

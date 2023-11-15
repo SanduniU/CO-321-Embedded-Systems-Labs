@@ -22,7 +22,7 @@ int main(void){
 
 ISR(TIMER0_OVF_vect){
     counter++;
-    if(counter >=50){
+    if(counter ==50){
         PORTB ^= (1<<5);
         counter = 0;
     }

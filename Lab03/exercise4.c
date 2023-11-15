@@ -41,7 +41,7 @@ int main(void){
 ISR(TIMER1_OVF_vect){
     PORTB ^=(1<<5);
     TCNT1 = 3036;
-    TCCR1A = 0x00;
-    TCCR1B = 0x04;// 256 pre scalar
+    // TCCR1A = 0x00;
+    // TCCR1B = 0x04;// 256 pre scalar
 
 }
