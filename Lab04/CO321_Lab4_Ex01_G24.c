@@ -14,7 +14,6 @@ int main(){
 
     //OCR0= 256*50/100-1 = 127
     OCR0A = 127; // 50% duty cycle
-    // TIMSK0 |= (1<<OCIE0A);
 
     while(1);
     return 0;

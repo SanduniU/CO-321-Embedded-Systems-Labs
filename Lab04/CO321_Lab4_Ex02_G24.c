@@ -15,7 +15,6 @@ int main(){
 
     //OCR0= 256*50/100-1 = 127
     OCR0A = 255;
-    // TIMSK0 |= (1<<OCIE0A);
 
     while(1){
         while(OCR0A>0){

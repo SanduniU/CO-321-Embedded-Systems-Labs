@@ -58,7 +58,7 @@ int main(){
 
         else{
             TCCR2A = 0x00;
-            TCCR2B = 0x00;
+            // TCCR2B = 0x00;
             OCR2A = 0;
         }
     }
