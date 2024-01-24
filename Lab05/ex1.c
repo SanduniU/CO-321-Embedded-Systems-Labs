@@ -13,7 +13,7 @@ int main(void)
     while(1)
     {
         adc_start();
-        _delay_ms(5000);
+        _delay_ms(1000);
     }
 
 }
@@ -27,9 +27,11 @@ void adc_init()
 
     // Turn  on ADC module and set prescaler to 128
     // 16000000/128 = 125000Hz<200000Hz
+    ADCSRA = 0x00;
     ADCSRA |= (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);  
 
     // select voltage reference to AVCC and set ADC1 as input channel, left adjusted
+    ADMUX = 0x00;
     ADMUX |= (1 << REFS0) | (1 << MUX0) | (1 << ADLAR);
 }
 
@@ -42,7 +44,7 @@ void adc_start()
     };
 
     // clear ADIF by writing 1 to it
-    ADCSRA |= (1 << ADIF);
+    // ADCSRA |= (1 << ADIF);
     
     // read the result from ADCH and ADCL and display it on PORTD
     PORTD = (ADCL>>6) | (ADCH<<2);

@@ -2,6 +2,7 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #define BLINK_DELAY_MS 500
+#define EEPROM_SIZE 1023
 
 void EEPROMwrite(unsigned int address, char data);
 char EEPROMread(unsigned int address);
@@ -12,19 +13,18 @@ void usart_send(unsigned char data);
 int main(void)
 {
     usart_init();
-    unsigned int address = 10;
+    unsigned int address = 1;
     unsigned char data = 'a';
 
-    while(1){
+    while(address < EEPROM_SIZE){
         data = EEPROMread(address);
-        usart_send(data);
-
-        // Check for the end of data condition
-        if (data == '\n') {
-            break; // or any other appropriate termination condition
+        
+        while(data != '\n' && address< EEPROM_SIZE){
+            usart_send(data);
+            data = EEPROMread(++address);
         }
+        usart_send('\n');
 
-        address++;
     }
 }
 

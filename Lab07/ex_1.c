@@ -1,24 +1,48 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+
+#define BUFFER_SIZE 30
 #define BLINK_DELAY_MS 500
 
 void EEPROMwrite(unsigned int address, char data);
 char EEPROMread(unsigned int address);
 unsigned char usart_receive(void);
 void usart_init(void);
+void usart_send(unsigned char data);
 
-int main(void)
-{
+int main(void) {
     usart_init();
-    unsigned int address = 10;
-    unsigned char data = 'a';
+    unsigned int address = 1;
+    unsigned char data;
+    unsigned char buffer[BUFFER_SIZE];
+    int bufferIndex = 0;
 
-    while(1){
-        while(data!='\n'){
-            data = usart_receive();
-            EEPROMwrite(address,data);
-            address++;
+    while (1) {
+        data = usart_receive();
+
+        // Check for newline character or buffer overflow
+        if (data == '\n' || bufferIndex >= BUFFER_SIZE - 1) {
+            // Null-terminate the buffer
+            buffer[bufferIndex] = '\0';
+
+            // Print and store in EEPROM
+            for (int i = 0; i < bufferIndex; i++) {
+                usart_send(buffer[i]);
+                EEPROMwrite(address, buffer[i]);
+                address++;
+            }
+
+            // Reset the buffer index for the next line
+            bufferIndex = 0;
+
+            // Add a small delay to allow for stable reception
+            _delay_ms(10);
+            
+        } else {
+            // Add the character to the buffer
+            buffer[bufferIndex] = data;
+            bufferIndex++;
         }
     }
 }
@@ -64,4 +88,12 @@ unsigned char usart_receive(void) {
 
   // Return received data
   return UDR0;
+}
+
+void usart_send(unsigned char data) {
+  // Wait if a byte is being transmitted
+  while (!(UCSR0A & (1 << UDRE0)));
+
+  // Transmit data
+  UDR0 = data;
 }
