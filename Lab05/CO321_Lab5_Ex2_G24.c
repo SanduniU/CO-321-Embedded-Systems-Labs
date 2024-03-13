@@ -23,16 +23,17 @@ void adc_init()
     // make ADC1 as input
     DDRC &= ~(1 << PC1);
     // make port D as output
-    DDRD = 0xFF;
+    DDRD |= 0xFF;
 
     // Turn  on ADC module and set prescaler to 128
     // 16000000/128 = 125000Hz<200000Hz
     ADCSRA = 0x00;
     ADCSRA |= (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);  
 
-    // select voltage reference to AVCC and set ADC1 as input channel, left adjusted
+    // select voltage reference to external AREF and set ADC1 as input channel, left adjusted
     ADMUX = 0x00;
-    ADMUX |= (1 << REFS0) | (1 << MUX0) | (1 << ADLAR);
+    ADMUX |=  (1 << MUX0) | (1 << ADLAR);
+
 }
 
 void adc_start()
@@ -44,6 +45,12 @@ void adc_start()
     };
     
     // read the result from ADCH and display it on PORTD
-    PORTD = ADCH ;
+    if(ADCH<128){
+        PORTD = 0xFF;
+    }
+    else{
+        PORTD=0x00;
+    }
 
 }
+

@@ -1,8 +1,9 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+
+#define BUFFER_SIZE 30
 #define BLINK_DELAY_MS 500
-#define EEPROM_SIZE 20
 
 void EEPROMwrite(unsigned int address, char data);
 char EEPROMread(unsigned int address);
@@ -10,24 +11,41 @@ unsigned char usart_receive(void);
 void usart_init(void);
 void usart_send(unsigned char data);
 
-int main(void)
-{
+int main(void) {
     usart_init();
     unsigned int address = 1;
-    unsigned char data = 'a';
+    unsigned char data;
+    unsigned char buffer[BUFFER_SIZE];
+    int bufferIndex = 0;
 
-    while(address < EEPROM_SIZE){
-        data = EEPROMread(address);
-        
-        while(data != '\n' && address< EEPROM_SIZE){
-            usart_send(data);
-            data = EEPROMread(++address);
+    while (1) {
+        data = usart_receive();
+
+        // Check for newline character or buffer overflow
+        if (data == '\n' || bufferIndex >= BUFFER_SIZE - 1) {
+            // Null-terminate the buffer
+            buffer[bufferIndex] = '\0';
+
+            // Print and store in EEPROM
+            for (int i = 0; i < bufferIndex; i++) {
+                usart_send(buffer[i]);
+                EEPROMwrite(address, buffer[i]);
+                address++;
+            }
+
+            // Reset the buffer index for the next line
+            bufferIndex = 0;
+
+            // Add a small delay to allow for stable reception
+            _delay_ms(10);
+            
+        } else {
+            // Add the character to the buffer
+            buffer[bufferIndex] = data;
+            bufferIndex++;
         }
-        usart_send('\n');
-
     }
 }
-
 
 void EEPROMwrite(unsigned int address, char data){
     while(EECR & (1<<EEPE));
